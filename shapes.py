@@ -29,6 +29,8 @@ class I_Shape(Block):
                       Block(pos + Vector2(2 * width, 0), width, height),
                       Block(pos + Vector2(3 * width, 0), width, height)]
         self.colour = (18, 228, 228)
+        self.width = 4
+        self.height = 1
 
     def move_to(self, pos):
         vector = pos - self.position #pos relative to top left of first block.
@@ -60,6 +62,8 @@ class L_Shape(Block):
                       Block(pos + Vector2(width, 2 * height), width, height)]
         self.move_to(pos)
         self.colour = (220, 150, 20)
+        self.width = 2
+        self.height = 3
 
     def move_to(self, pos):
         vector = pos - self.position #pos relative to top left of first block.
@@ -91,6 +95,8 @@ class O_Shape(Block):
                       Block(pos + Vector2(width, height), width, height)]
         self.move_to(pos)
         self.colour = (220, 220, 20)
+        self.width = 2
+        self.height = 2
 
     def move_to(self, pos):
         vector = pos - self.position  # pos relative to top left of first block.
@@ -117,6 +123,8 @@ class S_Shape(Block):
                       Block(pos + Vector2(0, height), width, height)]
         self.move_to(pos)
         self.colour = (20, 220, 20)
+        self.width = 3
+        self.height = 2
 
     def move_to(self, pos):
         vector = pos - self.position  # pos relative to top left of first block.
@@ -148,6 +156,8 @@ class T_Shape(Block):
                       Block(pos + Vector2(width, height), width, height)]
         self.move_to(pos)
         self.colour = (220, 20, 220)
+        self.width = 3
+        self.height = 2
 
     def move_to(self, pos):
         vector = pos - self.position  # pos relative to top left of first block.

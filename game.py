@@ -52,7 +52,7 @@ class Main:
     def create_new_shape(self, position: Vector2, width, height):
         tetromino_shapes = ['I', 'L', 'O', 'S', 'T']
         index = random.randint(0, len(tetromino_shapes)-1)
-        return eval(f"shapes.{tetromino_shapes[index]}_Shape({position + Vector2(25, 25)},{width},{height})")
+        return eval(f"shapes.{tetromino_shapes[index]}_Shape({position},{width},{height})")
 
     def equip_new_block(self):
         if not self.current_shape:
@@ -61,7 +61,7 @@ class Main:
                 the_shape.move_to(new_position)
                 self.current_shape.append(the_shape)
                 self.next_shape.remove(the_shape)
-                self.next_shape.append(self.create_new_shape(top_left_of_next_block_box, grid_width, grid_height))
+                self.next_shape.append(self.create_new_shape((0,0), grid_width, grid_height))
 
     def set_direction(self, direction):
         self.block_direction = direction
@@ -126,8 +126,21 @@ class Main:
     def update(self):
         if self.quarters_to_rotate:
             for shape in self.current_shape:
+                rotation_in_bounds = False
                 shape.rotate(self.quarters_to_rotate)
                 self.quarters_to_rotate = 0
+                while not rotation_in_bounds:
+                    for block in shape.shape:
+                        if block.position.x < top_left_of_grid.x:
+                            new_shape_position = shape.position.copy() + Vector2(grid_width,0)
+                            shape.move_to(new_shape_position)
+                            break
+                        elif block.position.x > top_left_of_grid.x + (num_columns-1)*grid_width:
+                            new_shape_position = shape.position.copy() - Vector2(grid_width,0)
+                            shape.move_to(new_shape_position)
+                            break
+                        else:
+                            rotation_in_bounds = True
         else:
             for _ in range(self.block_speed):
                 self.move_current_block()
@@ -155,7 +168,7 @@ class Main:
 
     def reset(self):
         self.score = 0
-        self.next_shape = [self.create_new_shape(top_left_of_next_block_box, grid_width, grid_height)]
+        self.next_shape = [self.create_new_shape((0,0), grid_width, grid_height)]
         self.current_shape = []
         self.placed_blocks = []
         self.block_direction = 0
@@ -164,8 +177,15 @@ class Main:
         self.game_over = False
 
     def draw_all(self, the_screen):
-        for shape in self.current_shape + self.next_shape:
+        for shape in self.current_shape:
             shape.draw_shape(the_screen)
+        for shape in self.next_shape:
+            shape_width = shape.width * grid_width
+            shape_height = shape.height * grid_height
+            shape_screen = pygame.Surface((shape_width, shape_height))
+            shape.draw_shape(shape_screen)
+            shape_rect = shape_screen.get_rect(center = tuple(top_left_of_next_block_box + Vector2(next_block_box_width/2,next_block_box_height/2)))
+            the_screen.blit(shape_screen,shape_rect)
         for block, colour in self.placed_blocks:
             block.draw(the_screen, colour)
 
