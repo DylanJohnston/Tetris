@@ -11,22 +11,24 @@ pygame.init()
 clock = pygame.time.Clock()
 
 screen_width = 800
-screen_height = 800
-screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Tetris")
-
-pygame.mixer.music.load("Tetris.mp3")
-pygame.mixer.music.play(-1)
-
+screen_height = 700
 top_left_of_grid = Vector2(50, 50)
 grid_width, grid_height = (40, 40)
-top_left_of_next_block_box = Vector2(525, 150)
+top_left_of_next_block_box = Vector2(525, 200)
 next_block_box_width, next_block_box_height = (200, 200)
 num_columns = 10
 num_rows = 15
 
-game_font = pygame.font.Font(size=40)
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption("Tetris")
 
+bg = pygame.image.load('spaceBG.jpg')
+bg_rect = bg.get_rect(center=(screen_width/2,screen_height/2))
+
+pygame.mixer.music.load("Tetris.mp3")
+pygame.mixer.music.play(-1)
+
+game_font = pygame.font.Font('goma.ttf',size=45)
 
 def game_text():
     next_block_text = str("Next Block:")
@@ -37,17 +39,8 @@ def game_text():
 
 class Main:
 
-    def __init__(self):  # groups
-        self.bg = pygame.image.load('blueBG.png')
+    def __init__(self):
         self.reset()
-        # self.score = 0
-        # self.next_shape = [self.create_new_shape(top_left_of_next_block_box, grid_width, grid_height)]
-        # self.current_shape = []
-        # self.placed_blocks = []
-        # self.block_direction = 0
-        # self.block_speed = 1
-        # self.quarters_to_rotate = 0
-        # self.game_over = False
 
     # noinspection PyMethodMayBeStatic
     def create_new_shape(self, position: Vector2, width, height):
@@ -182,12 +175,12 @@ class Main:
     def welcome_screen(self):
 
         welcome_text_1 = str(f"WELCOME TO TETRIS")
-        welcome_text_2 = str(f"PRESS THE ENTER KEY TO BEGIN")
+        welcome_text_2 = str(f"PRESS ANY KEY TO BEGIN")
 
         welcome_surface_1 = game_font.render(welcome_text_1, True, (255, 255, 255))
         welcome_surface_2 = game_font.render(welcome_text_2, True, (255, 255, 255))
 
-        rect_width, rect_height = game_font.size("PRESS THE ENTER KEY TO BEGIN")
+        rect_width, rect_height = game_font.size("PRESS THE ANY KEY TO BEGIN")
         welcome_rect = pygame.Rect(0, 0, rect_width, 2 * rect_height)
         welcome_rect.center = (screen_width / 2, screen_height / 2)
 
@@ -210,13 +203,13 @@ class Main:
                         close_welcome_screen = 1
                         break
 
-    def draw_all(self, the_screen):
+    def draw_all_blocks(self, the_screen):
         for shape in self.current_shape:
             shape.draw_shape(the_screen)
         for shape in self.next_shape:
             shape_width = shape.width * grid_width
             shape_height = shape.height * grid_height
-            shape_screen = pygame.Surface((shape_width, shape_height))
+            shape_screen = pygame.Surface((shape_width, shape_height),pygame.SRCALPHA)
             shape.draw_shape(shape_screen)
             shape_rect = shape_screen.get_rect(center=tuple(top_left_of_next_block_box
                                                             + Vector2(next_block_box_width / 2,
@@ -233,15 +226,14 @@ main_game = Main()
 score_checker = 0
 
 def draw_everything():
-    screen.blit(main_game.bg, (0, 0))
+    screen.blit(bg, bg_rect)
     pygame.draw.rect(screen, 'black',
                      pygame.Rect(top_left_of_grid.x, top_left_of_grid.y, grid_width * 10, grid_height * 15))
-    pygame.draw.rect(screen, 'black', pygame.Rect(top_left_of_next_block_box.x, top_left_of_next_block_box.y,
-                                                  next_block_box_width, next_block_box_height))
-    main_game.draw_all(screen)
+    #pygame.draw.rect(screen, 'black', pygame.Rect(top_left_of_next_block_box.x, top_left_of_next_block_box.y,
+                                                  #next_block_box_width, next_block_box_height))
+    main_game.draw_all_blocks(screen)
     main_game.score_text()
     game_text()
-
 
 while True:
 
