@@ -180,7 +180,7 @@ class Main:
         welcome_surface_1 = game_font.render(welcome_text_1, True, (255, 255, 255))
         welcome_surface_2 = game_font.render(welcome_text_2, True, (255, 255, 255))
 
-        rect_width, rect_height = game_font.size("PRESS THE ANY KEY TO BEGIN")
+        rect_width, rect_height = game_font.size("PRESS ANY KEY TO BEGIN")
         welcome_rect = pygame.Rect(0, 0, rect_width, 2 * rect_height)
         welcome_rect.center = (screen_width / 2, screen_height / 2)
 
@@ -195,6 +195,9 @@ class Main:
 
         while not close_welcome_screen:
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         pygame.quit()
