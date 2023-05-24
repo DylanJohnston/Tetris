@@ -154,7 +154,7 @@ class Main:
         score_text = str(f"Score: {self.score}")
         score_text_surface = game_font.render(score_text, True, (0, 0, 0))
         score_text_rect = score_text_surface.get_rect(
-            topleft=(top_left_of_next_block_box.x, top_left_of_next_block_box.y + 300))
+            topleft=(top_left_of_next_block_box.x+20, top_left_of_next_block_box.y + 300))
         screen.blit(score_text_surface, score_text_rect)
 
     def check_game_over(self):
