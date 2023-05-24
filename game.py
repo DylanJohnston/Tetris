@@ -51,7 +51,7 @@ class Main:
     # noinspection PyMethodMayBeStatic
     def create_new_shape(self, position: Vector2, width, height):
         tetromino_shapes = ['I', 'L', 'O', 'S', 'T']
-        index = random.randint(0, len(tetromino_shapes)-1)
+        index = random.randint(0, len(tetromino_shapes) - 1)
         return eval(f"shapes.{tetromino_shapes[index]}_Shape({position},{width},{height})")
 
     def equip_new_block(self):
@@ -61,7 +61,7 @@ class Main:
                 the_shape.move_to(new_position)
                 self.current_shape.append(the_shape)
                 self.next_shape.remove(the_shape)
-                self.next_shape.append(self.create_new_shape((0,0), grid_width, grid_height))
+                self.next_shape.append(self.create_new_shape(Vector2(0, 0), grid_width, grid_height))
 
     def set_direction(self, direction):
         self.block_direction = direction
@@ -130,17 +130,16 @@ class Main:
                 shape.rotate(self.quarters_to_rotate)
                 self.quarters_to_rotate = 0
                 while not rotation_in_bounds:
+                    rotation_in_bounds = True
                     for block in shape.shape:
                         if block.position.x < top_left_of_grid.x:
-                            new_shape_position = shape.position.copy() + Vector2(grid_width,0)
+                            new_shape_position = shape.position.copy() + Vector2(grid_width, 0)
                             shape.move_to(new_shape_position)
-                            break
-                        elif block.position.x > top_left_of_grid.x + (num_columns-1)*grid_width:
-                            new_shape_position = shape.position.copy() - Vector2(grid_width,0)
+                            rotation_in_bounds = False
+                        elif block.position.x > top_left_of_grid.x + (num_columns - 1) * grid_width:
+                            new_shape_position = shape.position.copy() - Vector2(grid_width, 0)
                             shape.move_to(new_shape_position)
-                            break
-                        else:
-                            rotation_in_bounds = True
+                            rotation_in_bounds = False
         else:
             for _ in range(self.block_speed):
                 self.move_current_block()
@@ -149,6 +148,9 @@ class Main:
         self.check_game_over()
         if self.game_over:
             self.reset()
+            pygame.display.update()
+            draw_everything()
+            self.welcome_screen()
         self.check_lines()
         self.equip_new_block()
         self.block_speed = 1
@@ -162,19 +164,47 @@ class Main:
         screen.blit(score_text_surface, score_text_rect)
 
     def check_game_over(self):
-        for block,_ in self.placed_blocks:
+        for block, _ in self.placed_blocks:
             if block.position.y < top_left_of_grid.y:
                 self.game_over = True
 
     def reset(self):
         self.score = 0
-        self.next_shape = [self.create_new_shape((0,0), grid_width, grid_height)]
+        self.next_shape = [self.create_new_shape(Vector2(0, 0), grid_width, grid_height)]
         self.current_shape = []
         self.placed_blocks = []
         self.block_direction = 0
         self.block_speed = 1
         self.quarters_to_rotate = 0
         self.game_over = False
+
+    def welcome_screen(self):
+        close_welcome_screen = 0
+        while not close_welcome_screen:
+            welcome_text_1 = str(f"WELCOME TO TETRIS")
+            welcome_text_2 = str(f"PRESS THE ENTER KEY TO BEGIN")
+
+            welcome_surface_1 = game_font.render(welcome_text_1, True, (255, 255, 255))
+            welcome_surface_2 = game_font.render(welcome_text_2, True, (255, 255, 255))
+
+            rect_width, rect_height = game_font.size("PRESS THE ENTER KEY TO BEGIN")
+            welcome_rect = pygame.Rect(0, 0, rect_width, 2 * rect_height)
+            welcome_rect.center = (screen_width / 2, screen_height / 2)
+
+            pygame.draw.rect(screen, "brown", welcome_rect)
+            screen.blit(welcome_surface_1, welcome_rect.topleft)
+            screen.blit(welcome_surface_2, (welcome_rect.topleft[0], welcome_rect.topleft[1] + rect_height))
+
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+                    if event.key:
+                        close_welcome_screen = 1
+                        break
 
     def draw_all(self, the_screen):
         for shape in self.current_shape:
@@ -184,8 +214,10 @@ class Main:
             shape_height = shape.height * grid_height
             shape_screen = pygame.Surface((shape_width, shape_height))
             shape.draw_shape(shape_screen)
-            shape_rect = shape_screen.get_rect(center = tuple(top_left_of_next_block_box + Vector2(next_block_box_width/2,next_block_box_height/2)))
-            the_screen.blit(shape_screen,shape_rect)
+            shape_rect = shape_screen.get_rect(center=tuple(top_left_of_next_block_box
+                                                            + Vector2(next_block_box_width / 2,
+                                                                      next_block_box_height / 2)))
+            the_screen.blit(shape_screen, shape_rect)
         for block, colour in self.placed_blocks:
             block.draw(the_screen, colour)
 
@@ -195,6 +227,17 @@ game_speed = 500
 pygame.time.set_timer(SCREEN_UPDATE, game_speed)
 main_game = Main()
 score_checker = 0
+
+def draw_everything():
+    screen.blit(main_game.bg, (0, 0))
+    pygame.draw.rect(screen, 'black',
+                     pygame.Rect(top_left_of_grid.x, top_left_of_grid.y, grid_width * 10, grid_height * 15))
+    pygame.draw.rect(screen, 'black', pygame.Rect(top_left_of_next_block_box.x, top_left_of_next_block_box.y,
+                                                  next_block_box_width, next_block_box_height))
+    main_game.draw_all(screen)
+    main_game.score_text()
+    game_text()
+
 
 while True:
 
@@ -214,6 +257,9 @@ while True:
             sys.exit()
 
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
             if event.key == pygame.K_UP or event.key == pygame.K_w:
                 pass
             if event.key == pygame.K_DOWN or event.key == pygame.K_s:
@@ -231,13 +277,6 @@ while True:
             main_game.update()
             updates_this_frame += 1
 
-    screen.blit(main_game.bg, (0, 0))
-    pygame.draw.rect(screen, 'black',
-                     pygame.Rect(top_left_of_grid.x, top_left_of_grid.y, grid_width * 10, grid_height * 15))
-    pygame.draw.rect(screen, 'black', pygame.Rect(top_left_of_next_block_box.x, top_left_of_next_block_box.y,
-                                                  next_block_box_width, next_block_box_height))
-    main_game.draw_all(screen)
-    main_game.score_text()
-    game_text()
+    draw_everything()
     pygame.display.update()
     clock.tick(60)
