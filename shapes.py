@@ -22,81 +22,57 @@ class Block:
         pygame.draw.rect(screen, colour, self.image)
         pygame.draw.rect(screen, 'black', self.image, 1)
 
-class I_Shape(Block):
-    def __init__(self, pos, width, height):
+class Shape(Block):
+    def __init__(self, type, pos, width, height):
         super().__init__(pos, width, height)
-        self.shape = [Block(pos, width, height), Block(pos + Vector2(width, 0), width, height),
-                      Block(pos + Vector2(2 * width, 0), width, height),
-                      Block(pos + Vector2(3 * width, 0), width, height)]
-        self.colour = (18, 228, 228)
-        self.width = 4
-        self.height = 1
+        if type == 'I':
+            self.shape = [Block(pos, width, height), Block(pos + Vector2(width, 0), width, height),
+                          Block(pos + Vector2(2 * width, 0), width, height),
+                          Block(pos + Vector2(3 * width, 0), width, height)]
+            self.colour = (18, 228, 228)
+            self.width = 4
+            self.height = 1
+            self.rotation_center_block = 1
+        elif type == 'L':
+            self.shape = [Block(pos, width, height),
+                          Block(pos + Vector2(0, height), width, height),
+                          Block(pos + Vector2(0, 2 * height), width, height),
+                          Block(pos + Vector2(width, 2 * height), width, height)]
+            self.colour = (220, 150, 20)
+            self.width = 2
+            self.height = 3
+            self.rotation_center_block = 3
 
-    def move_to(self, pos):
-        vector = pos - self.position #pos relative to top left of first block.
-        self.position += vector
-        for block in self.shape:
-            block.position += vector
-            block.move_to(block.position)
+        elif type == 'O':
+            self.shape = [Block(pos, width, height),
+                          Block(pos + Vector2(width, 0), width, height),
+                          Block(pos + Vector2(0, height), width, height),
+                          Block(pos + Vector2(width, height), width, height)]
+            self.colour = (220, 220, 20)
+            self.width = 2
+            self.height = 2
+            self.rotation_center_block = 3
 
-    def rotate(self,quarters:int):
-        center = self.shape[1].position.copy()
-        for block in self.shape:
-            block.position -= center  # make origin the top left corner of second block from left
-            block.position = block.position.rotate(quarters*-90)  # rotate it
-            block.position += center  # return origin to (0,0)
-            block.move_to(block.position)
-        self.position = self.shape[0].position.copy()
+        elif type == 'S':
+            self.shape = [Block(pos + Vector2(width, 0), width, height),
+                          Block(pos + Vector2(2 * width, 0), width, height),
+                          Block(pos + Vector2(width, height), width, height),
+                          Block(pos + Vector2(0, height), width, height)]
+            self.colour = (20, 220, 20)
+            self.width = 3
+            self.height = 2
+            self.rotation_center_block = 2
 
-    def draw_shape(self, screen):
-        for block in self.shape:
-            block.draw(screen, self.colour)
-
-
-class L_Shape(Block):
-    def __init__(self, pos, width, height):
-        super().__init__(pos, width, height)
-        self.shape = [Block(pos, width, height),
-                      Block(pos + Vector2(0, height), width, height),
-                      Block(pos + Vector2(0, 2 * height), width, height),
-                      Block(pos + Vector2(width, 2 * height), width, height)]
-        self.move_to(pos)
-        self.colour = (220, 150, 20)
-        self.width = 2
-        self.height = 3
-
-    def move_to(self, pos):
-        vector = pos - self.position #pos relative to top left of first block.
-        self.position += vector
-        for block in self.shape:
-            block.position += vector
-            block.move_to(block.position)
-
-    def rotate(self,quarters:int):
-        center = self.shape[3].position.copy()
-        for block in self.shape:
-            block.position -= center  # make origin the top left corner of bottom sticky out block in 'L'
-            block.position = block.position.rotate(quarters*-90)  # rotate it
-            block.position += center  # return origin to (0,0)
-            block.move_to(block.position)
-        self.position = self.shape[0].position.copy()
-
-    def draw_shape(self, screen):
-        for block in self.shape:
-            block.draw(screen, self.colour)
-
-
-class O_Shape(Block):
-    def __init__(self, pos, width, height):
-        super().__init__(pos, width, height)
-        self.shape = [Block(pos, width, height),
-                      Block(pos + Vector2(width, 0), width, height),
-                      Block(pos + Vector2(0, height), width, height),
-                      Block(pos + Vector2(width, height), width, height)]
-        self.move_to(pos)
-        self.colour = (220, 220, 20)
-        self.width = 2
-        self.height = 2
+        elif type == 'T':
+            self.shape = [Block(pos, width, height),
+                          Block(pos + Vector2(width, 0), width, height),
+                          Block(pos + Vector2(2 * width, 0), width, height),
+                          Block(pos + Vector2(width, height), width, height)]
+            self.move_to(pos)
+            self.colour = (220, 20, 220)
+            self.width = 3
+            self.height = 2
+            self.rotation_center_block = 3
 
     def move_to(self, pos):
         vector = pos - self.position  # pos relative to top left of first block.
@@ -105,75 +81,17 @@ class O_Shape(Block):
             block.position += vector
             block.move_to(block.position)
 
-    def rotate(self,quarters:int):
-        pass #rotate does nothing to a "O"
-
-
-    def draw_shape(self, screen):
-        for block in self.shape:
-            block.draw(screen, self.colour)
-
-
-class S_Shape(Block):
-    def __init__(self, pos, width, height):
-        super().__init__(pos, width, height)
-        self.shape = [Block(pos + Vector2(width, 0), width, height),
-                      Block(pos + Vector2(2 * width, 0), width, height),
-                      Block(pos + Vector2(width, height), width, height),
-                      Block(pos + Vector2(0, height), width, height)]
-        self.move_to(pos)
-        self.colour = (20, 220, 20)
-        self.width = 3
-        self.height = 2
-
-    def move_to(self, pos):
-        vector = pos - self.position  # pos relative to top left of first block.
-        self.position += vector
-        for block in self.shape:
-            block.position += vector
-            block.move_to(block.position)
-
-    def rotate(self,quarters:int):
-        center = self.shape[2].position.copy()
-        for block in self.shape:
-            block.position -= center  # make origin the top left corner bottom right block of S shape
-            block.position = block.position.rotate(quarters*-90)  # rotate it
-            block.position += center  # return origin to (0,0)
-            block.move_to(block.position)
-        self.position = self.shape[0].position.copy()
-
-    def draw_shape(self, screen):
-        for block in self.shape:
-            block.draw(screen, self.colour)
-
-
-class T_Shape(Block):
-    def __init__(self, pos, width, height):
-        super().__init__(pos, width, height)
-        self.shape = [Block(pos, width, height),
-                      Block(pos + Vector2(width, 0), width, height),
-                      Block(pos + Vector2(2 * width, 0), width, height),
-                      Block(pos + Vector2(width, height), width, height)]
-        self.move_to(pos)
-        self.colour = (220, 20, 220)
-        self.width = 3
-        self.height = 2
-
-    def move_to(self, pos):
-        vector = pos - self.position  # pos relative to top left of first block.
-        self.position += vector
-        for block in self.shape:
-            block.position += vector
-            block.move_to(block.position)
-
-    def rotate(self,quarters:int):
-        center = self.shape[3].position.copy()
-        for block in self.shape:
-            block.position -= center  # make origin the top left corner of bottom block in 'T'
-            block.position = block.position.rotate(quarters*-90)  # rotate it
-            block.position += center  # return origin to (0,0)
-            block.move_to(block.position)
-        self.position = self.shape[0].position.copy()
+    def rotate(self, quarters: int):
+        if type == 'O':
+            pass
+        else:
+            center = self.shape[self.rotation_center_block].position.copy()
+            for block in self.shape:
+                block.position -= center  # make origin the top left corner of second block from left
+                block.position = block.position.rotate(quarters * -90)  # rotate it
+                block.position += center  # return origin to (0,0)
+                block.move_to(block.position)
+            self.position = self.shape[0].position.copy()
 
     def draw_shape(self, screen):
         for block in self.shape:

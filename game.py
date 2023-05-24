@@ -1,5 +1,6 @@
 import random
 import sys
+import time
 
 import pygame
 from pygame.math import Vector2
@@ -52,7 +53,7 @@ class Main:
     def create_new_shape(self, position: Vector2, width, height):
         tetromino_shapes = ['I', 'L', 'O', 'S', 'T']
         index = random.randint(0, len(tetromino_shapes) - 1)
-        return eval(f"shapes.{tetromino_shapes[index]}_Shape({position},{width},{height})")
+        return shapes.Shape(tetromino_shapes[index],position,width,height)
 
     def equip_new_block(self):
         if not self.current_shape:
@@ -179,24 +180,27 @@ class Main:
         self.game_over = False
 
     def welcome_screen(self):
+
+        welcome_text_1 = str(f"WELCOME TO TETRIS")
+        welcome_text_2 = str(f"PRESS THE ENTER KEY TO BEGIN")
+
+        welcome_surface_1 = game_font.render(welcome_text_1, True, (255, 255, 255))
+        welcome_surface_2 = game_font.render(welcome_text_2, True, (255, 255, 255))
+
+        rect_width, rect_height = game_font.size("PRESS THE ENTER KEY TO BEGIN")
+        welcome_rect = pygame.Rect(0, 0, rect_width, 2 * rect_height)
+        welcome_rect.center = (screen_width / 2, screen_height / 2)
+
+        pygame.draw.rect(screen, "brown", welcome_rect)
+        screen.blit(welcome_surface_1, welcome_rect.topleft)
+        screen.blit(welcome_surface_2, (welcome_rect.topleft[0], welcome_rect.topleft[1] + rect_height))
+
+        pygame.display.update()
+        time.sleep(2)
+
         close_welcome_screen = 0
+
         while not close_welcome_screen:
-            welcome_text_1 = str(f"WELCOME TO TETRIS")
-            welcome_text_2 = str(f"PRESS THE ENTER KEY TO BEGIN")
-
-            welcome_surface_1 = game_font.render(welcome_text_1, True, (255, 255, 255))
-            welcome_surface_2 = game_font.render(welcome_text_2, True, (255, 255, 255))
-
-            rect_width, rect_height = game_font.size("PRESS THE ENTER KEY TO BEGIN")
-            welcome_rect = pygame.Rect(0, 0, rect_width, 2 * rect_height)
-            welcome_rect.center = (screen_width / 2, screen_height / 2)
-
-            pygame.draw.rect(screen, "brown", welcome_rect)
-            screen.blit(welcome_surface_1, welcome_rect.topleft)
-            screen.blit(welcome_surface_2, (welcome_rect.topleft[0], welcome_rect.topleft[1] + rect_height))
-
-            pygame.display.update()
-
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
